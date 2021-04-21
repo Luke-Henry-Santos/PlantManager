@@ -1,5 +1,6 @@
 import React from 'react'
 import { SafeAreaView, Text, View } from 'react-native'
+import { useNavigation } from '@react-navigation/core'
 
 import { Button } from '../components/Button'
 
@@ -7,6 +8,9 @@ import colors from '../styles/colors'
 import fonts from '../styles/fonts'
 
 export function Confirmation() {
+  const navigation = useNavigation()
+  const handleMoveOn = () => navigation.navigate('PlantSelect')
+
   return (
     <SafeAreaView style={{
       flex: 1,
@@ -49,6 +53,7 @@ export function Confirmation() {
         }}>
           <Button 
             title="Começar"
+            onPress={handleMoveOn}
           />
         </View>
 
