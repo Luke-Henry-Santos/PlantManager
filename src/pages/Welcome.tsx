@@ -9,6 +9,7 @@ import {
 } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/core'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import wateringImg from '../assets/watering.png'
 import colors from '../styles/colors'
@@ -17,7 +18,13 @@ import fonts from '../styles/fonts'
 export function Welcome() {
   const navigation = useNavigation()
 
-  const handleStart = () => navigation.navigate('UserIdentification')
+  const handleVerification = async () => {
+    const user = await AsyncStorage.getItem('@plantmanager:user')
+    if(!user)
+      navigation.navigate('UserIdentification')
+
+    navigation.navigate('PlantSelect')
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, }}>
@@ -56,7 +63,7 @@ export function Welcome() {
 
         <TouchableOpacity
           activeOpacity={0.7}
-          onPress={handleStart}
+          onPress={handleVerification}
           style={{
             backgroundColor: colors.green,
             justifyContent: 'center',

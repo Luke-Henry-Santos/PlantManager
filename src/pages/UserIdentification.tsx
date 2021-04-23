@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/core'
 import React, { useState } from 'react'
 import {
   SafeAreaView,
@@ -8,8 +7,11 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Platform,
-  Keyboard
+  Keyboard,
+  Alert
 } from 'react-native'
+import { useNavigation } from '@react-navigation/core'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { Button } from '../components/Button'
 
@@ -29,12 +31,24 @@ export function UserIdentification() {
     setIsFilled(!!name)
   }
   function handleInputFocus() { setIsFocused(true) }
+
   function handleInputChange(value: string) {
     setIsFilled(!!value)
     setName(value)
   }
 
-  const handleSubmit = () => navigation.navigate('Confirmation')
+  const handleSubmit = async () => {
+    if (!name)
+      return Alert.alert('Informe seu nome')
+
+    if (name.length < 3)
+      return Alert.alert('Informe um nome maior')
+
+    await AsyncStorage.setItem('@plantmanager:user', name)
+
+    navigation.navigate('UserImageIdentification')
+
+  }
 
   return (
     <SafeAreaView
@@ -81,7 +95,7 @@ export function UserIdentification() {
 
               <View style={{ marginTop: 40, width: '100%', paddingHorizontal: 20 }}>
                 <Button
-                  title="Confirmar"
+                  title="Continuar"
                   onPress={handleSubmit}
                 />
               </View>
