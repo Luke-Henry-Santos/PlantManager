@@ -1,15 +1,39 @@
 import React from 'react'
 import { SafeAreaView, Text, View } from 'react-native'
-import { useNavigation } from '@react-navigation/core'
+import { useNavigation, useRoute } from '@react-navigation/core'
 
 import { Button } from '../components/Button'
 
 import colors from '../styles/colors'
 import fonts from '../styles/fonts'
 
+interface Params {
+  title: string
+  subtitle: string
+  buttonTitle: string
+  icon: 'smile' | 'hug',
+  nextScreen: string
+}
+
+const emojis = {
+  hug: '🤗',
+  smile: '😁'
+}
+
+
 export function Confirmation() {
   const navigation = useNavigation()
-  const handleMoveOn = () => navigation.navigate('PlantSelect')
+  const routes = useRoute()
+
+  const {
+    title,
+    subtitle,
+    buttonTitle,
+    icon,
+    nextScreen
+  } = routes.params as Params
+
+  const handleMoveOn = () => navigation.navigate(nextScreen)
 
   return (
     <SafeAreaView style={{
@@ -22,11 +46,11 @@ export function Confirmation() {
         justifyContent: 'center',
         alignItems: 'center',
         width: '100%',
-        padding: 30 
+        padding: 30
       }}
       >
         <Text style={{ fontSize: 72 }}>
-          😁
+          {emojis[icon]}
         </Text>
 
         <Text style={{
@@ -36,7 +60,7 @@ export function Confirmation() {
           color: colors.heading,
           lineHeight: 38,
           marginTop: 15
-        }}> Prontinho</Text>
+        }}>{title}</Text>
 
         <Text style={{
           fontFamily: fonts.text,
@@ -44,15 +68,15 @@ export function Confirmation() {
           fontSize: 17,
           paddingVertical: 10,
           color: colors.heading,
-        }}> Agora vamos começar a cuidar das suas plantinhas com muito cuidado.</Text>
+        }}>{subtitle}</Text>
 
         <View style={{
           width: '100%',
           paddingHorizontal: 50,
           marginTop: 20
         }}>
-          <Button 
-            title="Começar"
+          <Button
+            title={buttonTitle}
             onPress={handleMoveOn}
           />
         </View>
