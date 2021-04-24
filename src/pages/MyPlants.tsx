@@ -3,22 +3,26 @@ import {
   View,
   Text,
   Image,
-  FlatList
+  FlatList,
+  Alert,
 } from 'react-native'
 import { Header } from '../components/Header'
-import { loadPlant, PlantProps } from '../libs/storage'
-import { formatDistance } from 'date-fns'
+import { loadPlant, PlantProps, removePlant } from '../libs/storage'
+import { format, formatDistance } from 'date-fns'
 import ptBr from 'date-fns/locale/pt-BR'
+import { PlantCardSecondary } from '../components/PlantCardSecondary'
+import { Load } from '../components/Load'
 
 import waterdrop from '../assets/waterdrop.png'
 
 import colors from '../styles/colors'
 import fonts from '../styles/fonts'
-import { PlantCardSecondary } from '../components/PlantCardSecondary'
 
 export function MyPlants() {
-  const [myPlants, setMyPlants] = useState<PlantProps[]>()
+  const [myPlants, setMyPlants] = useState<PlantProps[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedPlantTime, setSelectedPlantTime] = useState(0)
+  const [now, setNow] = useState(new Date())
 
   const [nextWatered, setNextWatered] = useState<string>()
 
@@ -26,22 +30,84 @@ export function MyPlants() {
     async function loadStoragedData() {
       const plantsStoraged = await loadPlant()
 
-      const nextTime = formatDistance(
-        new Date(plantsStoraged[0].dateTimeNotification).getTime(),
-        new Date().getTime(),
-        { locale: ptBr }
-      )
-
-      setNextWatered(
-        `Não esqueça de regar a ${plantsStoraged[0].name} à ${nextTime}`
-      )
-
-      setMyPlants(plantsStoraged)
+      if (plantsStoraged.length == 0) {
+        setNextWatered(
+          `Não há nenhuma planta para ser regada`
+        )
+      } else {
+        setMyPlants(plantsStoraged)
+        checkDistance(plantsStoraged)
+      }
       setLoading(false)
     }
 
+    setInterval(() => {
+      setNow(new Date())
+      if (myPlants.length > 0)
+        checkDistance(myPlants)
+    }, 60000)
+
     loadStoragedData()
   }, [])
+
+  function checkDistance(plantsStoraged: PlantProps[]) {
+    let nextTime, index = 0
+    for (let i = 0; i < plantsStoraged.length; i++) {
+      const plantDate = new Date(plantsStoraged[i].dateTimeNotification)
+      if (now.getTime() > plantDate.getTime()) {
+        plantDate.setDate(plantDate.getDate() + 1)
+        nextTime = formatDistance(
+          plantDate.getTime(),
+          now.getTime(),
+          { locale: ptBr }
+        )
+        index = plantsStoraged.indexOf(plantsStoraged[i])
+        break;
+      }
+
+      if (i == plantsStoraged.length) {
+        const plantDefault = new Date(plantsStoraged[0].dateTimeNotification)
+        nextTime = formatDistance(
+          plantDefault.getTime(),
+          now.getTime(),
+          { locale: ptBr }
+        )
+      }
+    }
+
+    setNextWatered(
+      `Não esqueça de regar a ${plantsStoraged[index].name} daqui ${nextTime}`
+    )
+  }
+
+  const handleRemove = (plant: PlantProps) => {
+    Alert.alert('Remover', `Deseja remover a ${plant.name}?`, [
+      {
+        text: 'Não',
+        style: 'cancel'
+      },
+      {
+        text: 'Sim',
+        onPress: async () => {
+          try {
+            await removePlant(plant.id)
+
+            setMyPlants((oldData) =>
+              oldData?.filter((item) => item.id !== plant.id)
+            )
+
+            checkDistance(myPlants)
+
+          } catch (err) {
+            Alert.alert('Não foi possível remover!')
+          }
+        }
+      }
+    ])
+  }
+
+  if (loading)
+    return <Load />
 
   return (
     <View style={{
@@ -92,15 +158,16 @@ export function MyPlants() {
           color: colors.heading,
           marginVertical: 20
         }}>Próximas regadas</Text>
-
         <FlatList
           data={myPlants}
           keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => (
-            <PlantCardSecondary data={item} />
+            <PlantCardSecondary
+              data={item}
+              handleRemove={() => handleRemove(item)}
+            />
           )}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ flex: 1 }}
         />
       </View>
 
