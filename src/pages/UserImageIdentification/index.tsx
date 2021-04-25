@@ -1,29 +1,26 @@
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, Text, View, TouchableOpacity, Image } from 'react-native'
+import * as ImagePicker from 'expo-image-picker'
 import { useNavigation } from '@react-navigation/core'
 import { Feather } from '@expo/vector-icons'
-import * as ImagePicker from 'expo-image-picker'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-import { Button } from '../components/Button'
+import { Button } from '../../components/Button'
 
-import colors from '../styles/colors'
-import fonts from '../styles/fonts'
+import colors from '../../styles/colors'
+import styles from './styles'
 
-export function UserImageIdentification() {
+export default () => {
+  const navigation = useNavigation()
   const [avatar, setAvatar] = useState<string>('')
 
-  const navigation = useNavigation()
+  useEffect(() => { requestCameraPermission() }, [])
 
-  useEffect(() => {
-    requestCameraPermission()
-  }, [])
-
-  const requestCameraPermission = async () => {
+  async function requestCameraPermission() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
+    if (status !== 'granted')
       alert('Sorry, we need camera roll permissions to make this work!');
-    }
+
     return status
   }
 
@@ -53,63 +50,48 @@ export function UserImageIdentification() {
       subtitle: 'Agora vamos começar a cuidar das suas plantinhas com muito cuidado.',
       buttonTitle: 'Começar',
       icon: 'smile',
-      nextScreen: 'PlantSelect'
+      nextScreen: 'Preload'
     })
   }
 
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1, width: '100%', alignItems: 'center', justifyContent: 'center'
-      }}>
+    <SafeAreaView style={styles.container}>
       <View style={{ flex: 1, width: '100%' }}>
 
-        <View
-          style={{
-            flex: 1, justifyContent: 'center', alignItems: 'center',
-            paddingHorizontal: 54
-          }}>
+        <View style={styles.content}>
 
           <View style={{ alignItems: 'center' }}>
             <Text style={{ fontSize: 44 }}>{avatar != '' ? '😄' : '😀'}</Text>
 
-            <Text
-              style={{
-                marginTop: 20, textAlign: 'center',
-                fontSize: 24, lineHeight: 32, fontFamily: fonts.heading,
-                color: colors.heading
-              }}>Gostaria de {'\n'} inserir um avatar?</Text>
+            <Text style={styles.title}>
+              Gostaria de {'\n'} inserir um avatar?
+            </Text>
           </View>
 
           <TouchableOpacity
-            style={{
-              backgroundColor: colors.green,
-              width: 100,
-              height: 100,
-              borderRadius: 50,
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginTop: 20
-            }}
+            style={styles.selectImageButton}
             onPress={pickImage}
           >
             {avatar != '' ? (
-              <Image source={{uri: avatar}} style={{width: '100%', height: '100%', borderRadius: 100}} />
+              <Image
+                source={{ uri: avatar }}
+                style={{ width: '100%', height: '100%', borderRadius: 100 }}
+              />
             ) : (
-              <Feather name="camera"
+              <Feather
+                name="camera"
                 style={{ fontSize: 35, color: colors.white }}
               />
             )}
           </TouchableOpacity>
 
-          <View style={{ marginTop: 40, width: '100%', paddingHorizontal: 20 }}>
-            <Button
-              title="Confirmar"
-              onPress={handleSubmit}
-            />
+          <View style={styles.button}>
+            <Button title="Confirmar" onPress={handleSubmit} />
           </View>
+
         </View>
+
       </View>
     </SafeAreaView>
   )
