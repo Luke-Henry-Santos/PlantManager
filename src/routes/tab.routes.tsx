@@ -1,10 +1,12 @@
 import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import colors from '../styles/colors'
-import { PlantSelect } from '../pages/PlantSelect'
-import { MaterialIcons } from '@expo/vector-icons'
-import { MyPlants } from '../pages/MyPlants'
 import { Platform } from 'react-native'
+import { MaterialIcons } from '@expo/vector-icons'
+
+import PlantSelect from '../pages/PlantSelect'
+import MyPlants from '../pages/MyPlants'
+
+import colors from '../styles/colors'
 
 const AppTab = createBottomTabNavigator()
 
